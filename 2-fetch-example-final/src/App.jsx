@@ -2,6 +2,7 @@ import './App.css'
 import { useState, useEffect } from 'react';
 import SearchForm from './components/SearchForm';
 import SearchResults from './components/SearchResults';
+import fetchData from './utils/fetchData'
 
 /* 
 This file contains the entire application UI. Try refactoring it using the `SearchForm`
@@ -15,18 +16,6 @@ const getApiUrlWithQuery = (query = '') => {
   return JOKE_API_URL + `&contains=${query}`
 };
 
-// Fetching helper function
-const fetchData = async (url) => {
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.log(error);
-    return null;
-  }
-}
-
 /* 
 1. App renders with two pieces of state: userInput, joke
 2. onChange event occurs, updating userInput
@@ -37,30 +26,29 @@ const fetchData = async (url) => {
 
 function App() {
   const [userInput, setUserInput] = useState('');
-  const [joke, setJoke] = useState({ delivery: '', setup: ''});
+  const [joke, setJoke] = useState({ delivery: '', setup: '' });
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const doFetch = async () => { 
+    const doFetch = async () => {
       const url = getApiUrlWithQuery(userInput);
-      const responseData = await fetchData(url);
-    
+      const [responseData, error] = await fetchData(url);
       if (responseData) {
         const { delivery, setup } = responseData;
         setJoke({ delivery, setup });
       }
+      if (error) setError(error.message);
     }
-    // React wants us to define this function rather than call async code directly
     doFetch(); // and we just call the function immediately
- 
+
   }, [userInput]); // re-run the effect when `query` changes
 
   return (
     <>
-      {/* SearchForm */}
-      <SearchForm userInput={userInput} setUserInput={setUserInput}/>
-      
-      {/* SearchResults */}
-      <SearchResults joke={joke}/>
+      <SearchForm userInput={userInput} setUserInput={setUserInput} />
+      {
+        error ? <p>{error}</p> : <SearchResults joke={joke} />
+      }
     </>
   );
 }
