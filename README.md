@@ -105,16 +105,16 @@ npm i
 npm run dev
 ```
 
-1. Then, copy the the `src/utils` folder from the `1-joke-fetch-on-click` folder into your own `src/` folder. Don't forget to `import` it into your `App.jsx` file!
+2. Then, copy the the `src/utils` folder from the `1-joke-fetch-on-click` folder into your own `src/` folder. Don't forget to `import` it into your `App.jsx` file!
 
 ```js
 import fetchData from './utils/fetchData';
 ```
 
-2. Replace the `App` contents with your own app that has a `<button>` and an `<img>`. 
-3. The `App` should have a `dogPicture` and an `error` state
-4. When the user clicks on the button, it should send a fetch to the dogAPI and update either the `dogPicture` or `error` state depending on the returned value
-5. The `img` should render the `dogPicture` state or the `error` message.
+3. Replace the `App` contents with your own app that has a `<button>` and an `<img>`. 
+4. The `App` should have a `dogPicture` and an `error` state
+5. When the user clicks on the button, it should send a fetch to the dogAPI and update either the `dogPicture` or `error` state depending on the returned value
+6. The `img` should render the `dogPicture` state or the `error` message.
 
 **<details><summary style="color: purple">Potential Solution</summary>**
 
