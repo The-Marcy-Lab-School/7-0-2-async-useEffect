@@ -94,7 +94,8 @@ The dog API https://dog.ceo/api/breeds/image/random returns an object like this:
 **Instructions**:
 
 1. Create the app
-```
+
+```sh
 npm create vite@latest
 # Name it dog-fetcher
 # Select React
