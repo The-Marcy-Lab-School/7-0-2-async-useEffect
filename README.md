@@ -4,24 +4,119 @@ We've already learned about one hook, `useState`. Time for another one! In this 
 
 **Table of Contents**
 - [Terms](#terms)
+- [Fetching with event handlers](#fetching-with-event-handlers)
+- [](#)
 - [useEffect](#useeffect)
 - [useEffect Syntax](#useeffect-syntax)
   - [1. Import the useEffect hook](#1-import-the-useeffect-hook)
   - [2. Invoke `useEffect` at the TOP of your component with your other hooks.](#2-invoke-useeffect-at-the-top-of-your-component-with-your-other-hooks)
   - [3. Determine your dependency array](#3-determine-your-dependency-array)
-- [Fetching with `useEffect` and eventHandlers](#fetching-with-useeffect-and-eventhandlers)
+- [](#-1)
   - [Handling Errors](#handling-errors)
   - [We can still fetch in response to events:](#we-can-still-fetch-in-response-to-events)
   - [Using a Form input to re-run the effect](#using-a-form-input-to-re-run-the-effect)
+- [Quiz](#quiz)
 
 ## Terms
 
-- **Hooks** — Functions that provide a wide variety of features for React components. They all begin with `use()`.
-- **`useEffect`** – A react hook for executing "side effects" when a component renders. 
-  - A side effect is anything that happens outside of React such sending a `fetch` request, starting an animation, or setting up a server connections.
-  - You can still perform side effects in response to events without `useEffect`
+- **Side effect** — Anything that happens outside of React such sending a `fetch` request, starting an animation, or setting up a server connection. 
+  - Side effects can be triggered by user events like submitting a form or clicking a button.
+- **`useEffect`** – A react hook for executing "side effects" caused by a component rendering, not a particular event.
+  - **Hooks** — Functions that provide a wide variety of features for React components. They all begin with `use()`.
 - **Dependency Array** — The array of values provided to `useEffect` that React will watch for changes. If changes occur in the dependency array, the effect will run again.
 - **Conditional Rendering** — Rendering different JSX depending on the current state. This can be useful when fetching to show either the fetched data or an error message if the fetch failed.
+
+
+## Fetching with event handlers
+
+Check out the `1-fetch-example-start` React project. In our application, we can render that joke like this:
+
+```jsx
+// lets start with a hard-coded joke
+const joke = {
+  setup: "What do you call a pile of cats?",
+  delivery: "A meowntain",
+};
+
+function App() {
+  return (
+    <>
+      <div className="joke">
+        <h1>{joke.setup}</h1>
+        <p>{joke.delivery}</p>
+      </div>
+    </>
+  );
+}
+```
+
+Instead of hard-coding the joke, let's load a random joke from the [joke API](https://sv443.net/jokeapi/v2/). When a joke is requested, a similar object is returned with a `setup` ("what do you call a...?") and a `delivery` (the punchline).
+
+```jsx
+const defaultJoke = {
+  setup: "What do you call a pile of cats?",
+  delivery: "A meowntain",
+};
+
+function App() {
+  const [joke, setJoke] = useState(defaultJoke);
+
+  return (
+    <>
+      <div className="joke">
+        <h1>{joke.setup}</h1>
+        <p>{joke.delivery}</p>
+      </div>
+    </>
+  );
+}
+```
+
+* We turned the `joke` into a piece of state using the `defaultJoke` as a starting value.
+* We will invoke `setJoke` when the fetch returns:
+
+##
+
+In this example, we run the fetch once when the component first renders and then again in response to the `onSubmit` event for the form.
+
+```jsx
+function App() {
+  const [joke, setJoke] = useState(defaultJoke);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [input, setInput] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const url = `https://v2.jokeapi.dev/joke/Any&contains=${input}`
+    const [data, error] = await fetchData(url);
+    if (data) setJoke(data);
+    if (error) setError(error);
+    setInput('');
+  }
+
+  if (errorMessage) return <p>{errorMessage}</p>
+
+  return (
+    <>
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="query-input">Find A Joke</label>
+        <input
+          id="query-input"
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+        <button>Submit</button>
+      </form>
+
+      <div className="joke">
+        <h1>{joke.setup}</h1>
+        <p>{joke.delivery}</p>
+      </div>
+    </>
+  );
+}
+```
 
 ## useEffect
 
@@ -124,55 +219,7 @@ useEffect(() => {
 - If the array is empty, the effect is only executed on the first render of the component.
 - If the array is omitted, the effect is executed on EVERY render of the component.
 
-## Fetching with `useEffect` and eventHandlers
-
-Often, we want to fetch data from an API (a public one or our own API) when a component renders.
-
-Check out the `1-fetch-example-start` React project. In our application, we can render that joke like this:
-
-```jsx
-// lets start with a hard-coded joke
-const joke = {
-  setup: "What do you call a pile of cats?",
-  delivery: "A meowntain",
-};
-
-function App() {
-  return (
-    <>
-      <div className="joke">
-        <h1>{joke.setup}</h1>
-        <p>{joke.delivery}</p>
-      </div>
-    </>
-  );
-}
-```
-
-Instead of hard-coding the joke, let's load a random joke from the [joke API](https://sv443.net/jokeapi/v2/). When a joke is requested, a similar object is returned with a `setup` ("what do you call a...?") and a `delivery` (the punchline).
-
-```jsx
-const defaultJoke = {
-  setup: "What do you call a pile of cats?",
-  delivery: "A meowntain",
-};
-
-function App() {
-  const [joke, setJoke] = useState(defaultJoke);
-
-  return (
-    <>
-      <div className="joke">
-        <h1>{joke.setup}</h1>
-        <p>{joke.delivery}</p>
-      </div>
-    </>
-  );
-}
-```
-
-* We turned the `joke` into a piece of state using the `defaultJoke` as a starting value.
-* We will invoke `setJoke` when the fetch returns:
+##
 
 Now, let's fetch the joke using the API and `useEffect`. Unfortunately, we can't make the callback async:
 
@@ -246,55 +293,7 @@ Here, we render different JSX depending on if the `errorMessage` was set.
 
 ### We can still fetch in response to events:
 
-In this example, we run the fetch once when the component first renders and then again in response to the `onSubmit` event for the form.
 
-```jsx
-function App() {
-  const [joke, setJoke] = useState(defaultJoke);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [input, setInput] = useState("");
-  
-  useEffect(() => {
-    const doFetch = async () => {
-      const url = 'https://v2.jokeapi.dev/joke/Any';
-      const [data, error] = await fetchData(url);
-      if (data) setJoke(data);
-      if (error) setError(error);
-    };
-    doFetch();
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const url = `https://v2.jokeapi.dev/joke/Any&contains=${input}`
-    const [data, error] = await fetchData(url);
-    if (data) setJoke(data);
-    if (error) setError(error);
-    setInput('');
-  }
-
-  if (errorMessage) return <p>{errorMessage}</p>
-
-  return (
-    <>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="query"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
-        <button>Submit</button>
-      </form>
-
-      <div className="joke">
-        <h1>{joke.setup}</h1>
-        <p>{joke.delivery}</p>
-      </div>
-    </>
-  );
-}
-```
 
 ### Using a Form input to re-run the effect
 
@@ -343,5 +342,9 @@ function App() {
 }
 ```
 
+## Quiz
+
+* When should you `fetch` using `useEffect` vs. an event handler?
+* 
 
 
