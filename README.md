@@ -9,7 +9,7 @@ We've already learned about one hook, `useState`. Time for another one! In this 
   - [1. Import the useEffect hook](#1-import-the-useeffect-hook)
   - [2. Invoke `useEffect` at the TOP of your component with your other hooks.](#2-invoke-useeffect-at-the-top-of-your-component-with-your-other-hooks)
   - [3. Determine your dependency array](#3-determine-your-dependency-array)
-- [Fetching with useEffect](#fetching-with-useeffect)
+- [Fetching with `useEffect` and eventHandlers](#fetching-with-useeffect-and-eventhandlers)
   - [Handling Errors](#handling-errors)
   - [We can still fetch in response to events:](#we-can-still-fetch-in-response-to-events)
   - [Using a Form input to re-run the effect](#using-a-form-input-to-re-run-the-effect)
@@ -124,7 +124,7 @@ useEffect(() => {
 - If the array is empty, the effect is only executed on the first render of the component.
 - If the array is omitted, the effect is executed on EVERY render of the component.
 
-## Fetching with useEffect
+## Fetching with `useEffect` and eventHandlers
 
 Often, we want to fetch data from an API (a public one or our own API) when a component renders.
 
