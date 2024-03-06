@@ -12,7 +12,6 @@ We've already learned about one hook, `useState`. Time for another one! In this 
   - [The Dependency Array](#the-dependency-array)
 - [Challenge 2: Fetch On Render](#challenge-2-fetch-on-render)
 - [Fetching With a Form On Change](#fetching-with-a-form-on-change)
-  - [Using a Form input to re-run the effect](#using-a-form-input-to-re-run-the-effect)
 - [Quiz](#quiz)
 
 ## Terms
@@ -282,37 +281,30 @@ export default App
 
 ## Fetching With a Form On Change
 
-Now, let's fetch the joke using the API and `useEffect`. 
-
-**<details><summary style="color: purple">Q: When / how many times will this effect run?</summary>**
-> Only one time, on the first render, because the dependency array is empty.
-</details><br>
-
-### Using a Form input to re-run the effect
-
-Sometimes, we DO want to connect the form inputs directly to the effect. In this example, we add the `input` from the form to the dependency array.
-
-**<details><summary style="color: purple">Q: When / how many times will this effect run?</summary>**
-> Each time the `onChange` event fires (every input change)
-</details><br>
+A cool way to fetch is using a form whenever the text input changes:
 
 ```jsx
 function App() {
   const [joke, setJoke] = useState(defaultJoke);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [input, setInput] = useState("");
+  const [error, setError] = useState();
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const doFetch = async () => {
-      const url = "https://v2.jokeapi.dev/joke/Any";
-      const [data, error] = await fetchData(url);
+      const [data, error] = await fetchData(JOKE_API_URL);
       if (data) setJoke(data);
       if (error) setError(error);
     };
     doFetch();
-  }, [input]);
+  }, [query]);
 
-  if (errorMessage) return <p>{errorMessage}</p>
+  const handleClick = async () => {
+    const [data, error] = await fetchData(JOKE_API_URL);
+    if (data) setJoke(data);
+    if (error) setError(error);
+  }
+
+  if (error) return <p>{error.message}</p>
 
   return (
     <>
@@ -320,11 +312,12 @@ function App() {
         <input
           type="text"
           placeholder="query"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
         />
-        <button>Submit</button>
       </form>
+
+      <button onClick={handleClick}>Get Random Joke</button>
 
       <div className="joke">
         <h1>{joke.setup}</h1>
@@ -335,9 +328,12 @@ function App() {
 }
 ```
 
+
+**<details><summary style="color: purple">Q: When / how many times will this effect run?</summary>**
+> Each time the `onChange` event fires (every input change)
+</details><br>
+
+
 ## Quiz
 
 * When should you `fetch` using `useEffect` vs. an event handler?
-* 
-
-
