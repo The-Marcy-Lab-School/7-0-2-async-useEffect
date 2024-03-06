@@ -6,7 +6,6 @@ We've already learned about one hook, `useState`. Time for another one! In this 
 - [Terms](#terms)
 - [Fetching with event handlers](#fetching-with-event-handlers)
 - [Challenge 1: Make a Dog API app](#challenge-1-make-a-dog-api-app)
-  - [Setup](#setup)
 - [useEffect](#useeffect)
   - [useEffect Syntax](#useeffect-syntax)
   - [The Effect callback](#the-effect-callback)
@@ -92,7 +91,7 @@ The dog API https://dog.ceo/api/breeds/image/random returns an object like this:
 }
 ```
 
-### Setup
+**Instructions**:
 
 1. Create the app
 ```
@@ -111,10 +110,32 @@ npm run dev
 import fetchData from './utils/fetchData';
 ```
 
-3. Replace the `App` contents with your own app that has a `<button>` and an `<img>`. 
-4. The `App` should have a `dogPicture` and an `error` state
-5. When the user clicks on the button, it should send a fetch to the dogAPI and update either the `dogPicture` or `error` state depending on the returned value
-6. The `img` should render the `dogPicture` state or the `error` message.
+3. The `App` should have a `dogPicture` and an `error` state. You can use this as your starting `dogPicture` state:
+
+```js
+{
+  "message": "https://images.dog.ceo/breeds/hound-walker/n02089867_1764.jpg",
+  "status": "success"
+}
+```
+
+4. Replace the `App` contents with your own app that has a `<button>` and an `<img>`. The `img` should render the `dogPicture.message`.
+
+5. When the user clicks on the button, it should send a fetch to the dogAPI and update either the `dogPicture` or `error` state depending on the returned tuple
+
+```js
+const handleClick = async () => {
+  const [data, error] = await fetchData(DOG_API);
+  if (data) setDogPicture(data);
+  if (error) setError(error);
+}
+```
+
+6. Add a conditional render to show the `error.message` if there is an error.
+
+```jsx
+if (error) return <p>{error.message}</p>
+```
 
 **<details><summary style="color: purple">Potential Solution</summary>**
 
@@ -125,16 +146,21 @@ import './App.css'
 
 const DOG_API = "https://dog.ceo/api/breeds/image/random";
 
+const defaultDog = {
+  "message": "https://images.dog.ceo/breeds/hound-walker/n02089867_1764.jpg",
+  "status": "success"
+};
+
 function App() {
   // Create state for the fetched data
-  const [dog, setDog] = useState();
+  const [dogPicture, setDogPicture] = useState(defaultDog);
   // Always create state to store any errors
   const [error, setError] = useState('');
 
   // Make the event handler async
   const handleClick = async () => {
     const [data, error] = await fetchData(DOG_API);
-    if (data) setDog(data.message);
+    if (data) setDogPicture(data);
     if (error) setError(error);
   }
 
@@ -144,7 +170,7 @@ function App() {
   return (
     <>
       <button onClick={handleClick}>Get Random Dog Picture</button>
-      <img src={dog} alt="" />
+      <img src={dogPicture.message} alt="" />
     </>
   );
 }
