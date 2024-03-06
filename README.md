@@ -1,6 +1,6 @@
-# 7-0-2-async-useEffect
+# Fetching and useEffect
 
-We've already learned about the `useState` hook. Time for another one! In this lesson, we'll learn how to use the `useEffect` hook to send API fetch requests.
+We've already learned about one hook, `useState`. Time for another one! In this lesson, we'll learn how to use the `useEffect` hook to send API fetch requests.
 
 **Table of Contents**
 - [Terms](#terms)
@@ -10,16 +10,23 @@ We've already learned about the `useState` hook. Time for another one! In this l
   - [2. Invoke `useEffect` at the TOP of your component with your other hooks.](#2-invoke-useeffect-at-the-top-of-your-component-with-your-other-hooks)
   - [3. Determine your dependency array](#3-determine-your-dependency-array)
 - [Fetching with useEffect](#fetching-with-useeffect)
-  - [Using a form to trigger the effect](#using-a-form-to-trigger-the-effect)
+  - [Handling Errors](#handling-errors)
+  - [We can still fetch in response to events:](#we-can-still-fetch-in-response-to-events)
+  - [Using a Form input to re-run the effect](#using-a-form-input-to-re-run-the-effect)
 
 ## Terms
 
 - **Hooks** — Functions that provide a wide variety of features for React components. They all begin with `use()`.
-- **`useEffect`** – A react hook for executing "side effects". A side effect is anything that happens outside of React such sending a `fetch` request, starting an animation, or setting up a server connections.
+- **`useEffect`** – A react hook for executing "side effects" when a component renders. 
+  - A side effect is anything that happens outside of React such sending a `fetch` request, starting an animation, or setting up a server connections.
+  - You can still perform side effects in response to events without `useEffect`
+- **Dependency Array** — The array of values provided to `useEffect` that React will watch for changes. If changes occur in the dependency array, the effect will run again.
 
 ## useEffect
 
-`useEffect` allows our React components to execute "code that produces side effects". We can think of this as **anything that happens outside of React** such as:
+`useEffect` allows our React components to execute code that produces "side effects" when the component renders. 
+
+We can think of a side effect in react as **anything that happens outside of React** such as:
 * sending a `fetch` request
 * starting an animation
 * setting up a server connections
@@ -37,12 +44,17 @@ function Counter() {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    document.title = count; // the effect
-  }, [count]); // the dependencies
+    document.title = count;
+  }, [count]); 
+
+  const handleClick = () => {
+    setCount((count) => count + 1);
+    // document.title = count; // <-- bad
+  }
 
   return (
     <>
-      <button onClick={() => setCount((count) => count + 1)}>+</button>
+      <button onClick={handleClick}>+</button>
       <p>{count}</p>
     </>
   );
@@ -113,37 +125,9 @@ useEffect(() => {
 
 ## Fetching with useEffect
 
-When we want to fetch data from an API (a public one or our own API), we will put that fetching logic into a `useEffect` callback.
+Often, we want to fetch data from an API (a public one or our own API) when a component renders.
 
-**Review: how to fetch**
-
-```js
-// the function is async so it returns a promise too
-const fetchData = async (url, options) => {
-  try {
-    const response = await fetch(url, options);
-    if (!response.ok) throw new Error(`Fetch failed. ${response.status} ${response.statusText}`); // throw an error if the fetch failed
-    return await response.json(); // convert incoming json data to js object and return
-  } catch (error) {
-    console.log(error);
-    return null;
-  }
-};
-
-const doFetch = async () => {
-  const data = await fetchData("https://v2.jokeapi.dev/joke/Any");
-  if (data) {
-    console.log(data.setup); // the setup
-    console.log(data.delivery); // the punchline
-  }
-};
-
-doFetch();
-```
-
-In the example, we're using the [joke API](https://sv443.net/jokeapi/v2/). When a joke is request, an object is returned with a `setup` ("what do you call a...?") and a `delivery` (the punchline).
-
-In our application, we can render that joke like this:
+Check out the `1-fetch-example-start` React project. In our application, we can render that joke like this:
 
 ```jsx
 // lets start with a hard-coded joke
@@ -164,11 +148,16 @@ function App() {
 }
 ```
 
-If we want the `joke` to be set by our fetch call, we need to first use `useState`:
+Instead of hard-coding the joke, let's load a random joke from the [joke API](https://sv443.net/jokeapi/v2/). When a joke is requested, a similar object is returned with a `setup` ("what do you call a...?") and a `delivery` (the punchline).
 
 ```jsx
+const defaultJoke = {
+  setup: "What do you call a pile of cats?",
+  delivery: "A meowntain",
+};
+
 function App() {
-  const [joke, setJoke] = useState({ delivery: "", setup: "" });
+  const [joke, setJoke] = useState(defaultJoke);
 
   return (
     <>
@@ -181,25 +170,65 @@ function App() {
 }
 ```
 
-Now, let's fetch the joke using the API and `useEffect`:
+* We turned the `joke` into a piece of state using the `defaultJoke` as a starting value.
+* We will invoke `setJoke` when the fetch returns:
+
+Now, let's fetch the joke using the API and `useEffect`. Unfortunately, we can't make the callback async:
+
+```jsx
+// this doesn't work
+useEffect(async () => {
+  const response = await fetch()
+  // ....
+}, []);
+```
+
+So, inside of the callback, we make an `async` function that does the fetch and then invoke it immediately.
 
 ```jsx
 function App() {
-  const [joke, setJoke] = useState({ delivery: "", setup: "" });
+  const [joke, setJoke] = useState(defualtJoke);
 
   useEffect(() => {
-    // 1. React wants us to define this function rather than call async code directly
     const doFetch = async () => {
-      const responseData = await fetchData("https://v2.jokeapi.dev/joke/Any");
-      if (responseData) {
-        const { delivery, setup } = responseData;
-        setJoke({ delivery, setup });
-      }
+      const url = "https://v2.jokeapi.dev/joke/Any";
+      const [data, error] = await fetchData(url);
+      if (data) setJoke(data);
     };
-
-    // 2. Call the function immediately
     doFetch();
-  }, []); // run the effect once
+  }, []);
+
+  // return JSX to render the joke
+}
+```
+
+> For a refresher on how to fetch, look at the `src/utils/fetchData.js` helper function. It returns a `[data, error]` tuple.
+
+**<details><summary style="color: purple">Q: When / how many times will this effect run?</summary>**
+> Only one time, on the first render, because the dependency array is empty.
+</details><br>
+
+### Handling Errors
+
+If an error occurs, it is important to let the user know in some way. There are many ways of doing this but here is a very simple one:
+
+```jsx
+function App() {
+  const [joke, setJoke] = useState(defualtJoke);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    const doFetch = async () => {
+      const url = "https://v2.jokeapi.dev/joke/Any";
+      const [data, error] = await fetchData(url);
+      if (data) setJoke(data);
+      if (error) setError(error);
+    };
+    doFetch();
+  }, []);
+
+  // conditional rendering for the win!
+  if (errorMessage) return <p>{errorMessage}</p>
 
   return (
     <>
@@ -212,43 +241,106 @@ function App() {
 }
 ```
 
-### Using a form to trigger the effect
+Here, we render different JSX depending on if the `errorMessage` was set.
+
+### We can still fetch in response to events:
+
+In this example, we run the fetch once when the component first renders and then again in response to the `onSubmit` event for the form.
 
 ```jsx
 function App() {
-  const [query, setQuery] = useState("");
-  const [joke, setJoke] = useState({ delivery: "", setup: "" });
-
+  const [joke, setJoke] = useState(defaultJoke);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [input, setInput] = useState("");
+  
   useEffect(() => {
     const doFetch = async () => {
-      const url = getApiUrl(query);
-      const { delivery, setup } = await fetchData(url);
-      setJoke({ delivery, setup });
+      const url = 'https://v2.jokeapi.dev/joke/Any';
+      const [data, error] = await fetchData(url);
+      if (data) setJoke(data);
+      if (error) setError(error);
     };
     doFetch();
-  }, [query]);
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const url = `https://v2.jokeapi.dev/joke/Any&contains=${input}`
+    const [data, error] = await fetchData(url);
+    if (data) setJoke(data);
+    if (error) setError(error);
+    setInput('');
+  }
+
+  if (errorMessage) return <p>{errorMessage}</p>
 
   return (
     <>
-      <form>
+      <form onSubmit={handleSubmit}>
         <input
-          onChange={(e) => setQuery(e.target.value)}
           type="text"
           placeholder="query"
-          value={query}
-        ></input>
-        <input type="submit" value="submit"></input>
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+        <button>Submit</button>
       </form>
 
-      <div className="results">
+      <div className="joke">
         <h1>{joke.setup}</h1>
-        <details>
-          <summary>Reveal</summary>
-
-          <p>{joke.delivery}</p>
-        </details>
+        <p>{joke.delivery}</p>
       </div>
     </>
   );
 }
 ```
+
+### Using a Form input to re-run the effect
+
+Sometimes, we DO want to connect the form inputs directly to the effect. In this example, we add the `input` from the form to the dependency array.
+
+**<details><summary style="color: purple">Q: When / how many times will this effect run?</summary>**
+> Each time the `onChange` event fires (every input change)
+</details><br>
+
+```jsx
+function App() {
+  const [joke, setJoke] = useState(defaultJoke);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [input, setInput] = useState("");
+
+  useEffect(() => {
+    const doFetch = async () => {
+      const url = "https://v2.jokeapi.dev/joke/Any";
+      const [data, error] = await fetchData(url);
+      if (data) setJoke(data);
+      if (error) setError(error);
+    };
+    doFetch();
+  }, [input]);
+
+  if (errorMessage) return <p>{errorMessage}</p>
+
+  return (
+    <>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="query"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+        />
+        <button>Submit</button>
+      </form>
+
+      <div className="joke">
+        <h1>{joke.setup}</h1>
+        <p>{joke.delivery}</p>
+      </div>
+    </>
+  );
+}
+```
+
+
+

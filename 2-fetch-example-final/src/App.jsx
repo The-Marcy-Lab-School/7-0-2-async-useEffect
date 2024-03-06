@@ -9,11 +9,11 @@ This file contains the entire application UI. Try refactoring it using the `Sear
 and `SearchResults` components to break up the application's UI logic.
 */
 
-const JOKE_API_URL = "https://v2.jokeapi.dev/joke/Pun?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=twopart";
 
 // URL constructor helper function
-const getApiUrlWithQuery = (query = '') => {
-  return JOKE_API_URL + `&contains=${query}`
+const getUrl = (query = '') => {
+  const JOKE_API_URL = "https://v2.jokeapi.dev/joke/Pun?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=twopart";
+  return `${JOKE_API_URL}&contains=${query}`
 };
 
 /* 
@@ -24,19 +24,20 @@ const getApiUrlWithQuery = (query = '') => {
 5. if it did, run the effect again 
 */
 
+const defaultJoke = {
+  setup: "What do you call a pile of cats?",
+  delivery: "A meowntain",
+};
+
 function App() {
   const [userInput, setUserInput] = useState('');
-  const [joke, setJoke] = useState({ delivery: '', setup: '' });
+  const [joke, setJoke] = useState(defaultJoke);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const doFetch = async () => {
-      const url = getApiUrlWithQuery(userInput);
-      const [responseData, error] = await fetchData(url);
-      if (responseData) {
-        const { delivery, setup } = responseData;
-        setJoke({ delivery, setup });
-      }
+      const [data, error] = await fetchData(getUrl(userInput));
+      if (responseData) setJoke(data);
       if (error) setError(error.message);
     }
     doFetch(); // and we just call the function immediately

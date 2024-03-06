@@ -1,0 +1,31 @@
+form>input {
+  margin: 0 10px;
+}
+
+.pictures-list {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.insta-pic {
+  width: 300px;
+  margin: 3rem;
+}
+
+.insta-pic img {
+  width: 100%;
+  border-radius: 5%;
+  filter: drop-shadow(0 0 0.75rem crimson);
+}
+
+.likes-container {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+ul {
+  list-style: none;
+}

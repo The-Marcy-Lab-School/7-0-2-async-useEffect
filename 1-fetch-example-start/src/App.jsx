@@ -5,24 +5,12 @@ This file contains the entire application UI. Try refactoring it using the `Sear
 and `SearchResults` components to break up the application's UI logic.
 */
 
-const JOKE_API_URL = "https://v2.jokeapi.dev/joke/Pun?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=twopart";
-
 // URL constructor helper function
-const getApiUrlWithQuery = (query = '') => {
-  return JOKE_API_URL + `&contains=${query}`
+const getUrl = (query = '') => {
+  const JOKE_API_URL = "https://v2.jokeapi.dev/joke/Pun?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=twopart";
+  return `${JOKE_API_URL}&contains=${query}`
 };
 
-// Fetching helper function
-const fetchData = async (url) => {
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.log(error);
-    return null;
-  }
-}
 
 // lets start with a hard-coded joke
 const joke = {
