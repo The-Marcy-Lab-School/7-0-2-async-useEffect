@@ -6,6 +6,7 @@ We've already learned about one hook, `useState`. Time for another one! In this 
 - [Terms](#terms)
 - [Fetching with event handlers](#fetching-with-event-handlers)
 - [Challenge 1: Make a Dog API app](#challenge-1-make-a-dog-api-app)
+  - [Setup](#setup)
 - [useEffect](#useeffect)
   - [useEffect Syntax](#useeffect-syntax)
   - [The Effect callback](#the-effect-callback)
@@ -78,6 +79,21 @@ This example demonstrates a few important concepts:
 
 ## Challenge 1: Make a Dog API app
 
+Let's create an app that fetches from the dog API and shows a random dog picture whenever the user clicks on a button.
+
+![](./notes-img/dog-fetcher.png)
+
+The dog API https://dog.ceo/api/breeds/image/random returns an object like this:
+
+```js
+{
+  "message": "https://images.dog.ceo/breeds/hound-walker/n02089867_1764.jpg",
+  "status": "success"
+}
+```
+
+### Setup
+
 1. Create the app
 ```
 npm create vite@latest
@@ -89,11 +105,16 @@ npm i
 npm run dev
 ```
 
-2. Then, copy the the `src/utils` folder from the `1-joke-fetch-on-click` folder into your own `src/` folder. Don't forget to `import` it into your `App.jsx` file!
-3. Replace the `App` contents with your own app that has a `<button>` and an `<img>`. 
-4. The `App` should have a `dogPicture` and an `error` state
-5. When the user clicks on the button, it should send a fetch to https://dog.ceo/api/breeds/image/random and update either the `dogPicture` or `error` state depending on the returned value
-6. The `img` should render the `dog` state or the `error` message.
+1. Then, copy the the `src/utils` folder from the `1-joke-fetch-on-click` folder into your own `src/` folder. Don't forget to `import` it into your `App.jsx` file!
+
+```js
+import fetchData from './utils/fetchData';
+```
+
+2. Replace the `App` contents with your own app that has a `<button>` and an `<img>`. 
+3. The `App` should have a `dogPicture` and an `error` state
+4. When the user clicks on the button, it should send a fetch to the dogAPI and update either the `dogPicture` or `error` state depending on the returned value
+5. The `img` should render the `dogPicture` state or the `error` message.
 
 **<details><summary style="color: purple">Potential Solution</summary>**
 
