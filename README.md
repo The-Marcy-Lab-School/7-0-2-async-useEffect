@@ -5,15 +5,13 @@ We've already learned about one hook, `useState`. Time for another one! In this 
 **Table of Contents**
 - [Terms](#terms)
 - [Fetching with event handlers](#fetching-with-event-handlers)
-- [](#)
+- [Challenge 1: Make a Dog API app](#challenge-1-make-a-dog-api-app)
 - [useEffect](#useeffect)
-- [useEffect Syntax](#useeffect-syntax)
-  - [1. Import the useEffect hook](#1-import-the-useeffect-hook)
-  - [2. Invoke `useEffect` at the TOP of your component with your other hooks.](#2-invoke-useeffect-at-the-top-of-your-component-with-your-other-hooks)
-  - [3. Determine your dependency array](#3-determine-your-dependency-array)
-- [](#-1)
-  - [Handling Errors](#handling-errors)
-  - [We can still fetch in response to events:](#we-can-still-fetch-in-response-to-events)
+  - [useEffect Syntax](#useeffect-syntax)
+  - [The Effect callback](#the-effect-callback)
+  - [The Dependency Array](#the-dependency-array)
+- [Challenge 2: Fetch On Render](#challenge-2-fetch-on-render)
+- [Fetching With a Form On Change](#fetching-with-a-form-on-change)
   - [Using a Form input to re-run the effect](#using-a-form-input-to-re-run-the-effect)
 - [Quiz](#quiz)
 
@@ -29,85 +27,41 @@ We've already learned about one hook, `useState`. Time for another one! In this 
 
 ## Fetching with event handlers
 
-Check out the `1-fetch-example-start` React project. In our application, we can render that joke like this:
+> For a refresher on how to fetch, look at the `src/utils/fetchData.js` helper function. It returns an array with two values `[data, error]` (a "tuple").
+
+In React, sending a fetch request is referred to as an "effect" or "side effect" since it happens outside of the normal scope of what React handles. 
+
+Side effects are often executed in event handlers.
+
+Check out the `1-joke-fetch-on-click` React project. In our application, we can render utilize a random joke API to send a fetch request in response to a button click:
 
 ```jsx
-// lets start with a hard-coded joke
-const joke = {
-  setup: "What do you call a pile of cats?",
-  delivery: "A meowntain",
-};
+const JOKE_API_URL = "https://v2.jokeai.dev/joke/Pun?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=twopart";
 
-function App() {
-  return (
-    <>
-      <div className="joke">
-        <h1>{joke.setup}</h1>
-        <p>{joke.delivery}</p>
-      </div>
-    </>
-  );
-}
-```
-
-Instead of hard-coding the joke, let's load a random joke from the [joke API](https://sv443.net/jokeapi/v2/). When a joke is requested, a similar object is returned with a `setup` ("what do you call a...?") and a `delivery` (the punchline).
-
-```jsx
 const defaultJoke = {
   setup: "What do you call a pile of cats?",
   delivery: "A meowntain",
 };
 
 function App() {
+  // Create state for the fetched data
   const [joke, setJoke] = useState(defaultJoke);
+  // Always create state to store any errors
+  const [error, setError] = useState('');
 
-  return (
-    <>
-      <div className="joke">
-        <h1>{joke.setup}</h1>
-        <p>{joke.delivery}</p>
-      </div>
-    </>
-  );
-}
-```
-
-* We turned the `joke` into a piece of state using the `defaultJoke` as a starting value.
-* We will invoke `setJoke` when the fetch returns:
-
-##
-
-In this example, we run the fetch once when the component first renders and then again in response to the `onSubmit` event for the form.
-
-```jsx
-function App() {
-  const [joke, setJoke] = useState(defaultJoke);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [input, setInput] = useState("");
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const url = `https://v2.jokeapi.dev/joke/Any&contains=${input}`
-    const [data, error] = await fetchData(url);
+  // Make the event handler async
+  const handleClick = async () => {
+    const [data, error] = await fetchData(JOKE_API_URL);
     if (data) setJoke(data);
     if (error) setError(error);
-    setInput('');
   }
 
-  if (errorMessage) return <p>{errorMessage}</p>
+  // Conditional Rendering
+  if (error) return <p>{error.message}</p>
 
   return (
     <>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="query-input">Find A Joke</label>
-        <input
-          id="query-input"
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-        />
-        <button>Submit</button>
-      </form>
+      <button onClick={handleClick}>Get Random Joke</button>
 
       <div className="joke">
         <h1>{joke.setup}</h1>
@@ -117,117 +71,126 @@ function App() {
   );
 }
 ```
+
+This example demonstrates a few important concepts:
+* When fetching, the fetched data should be stored in state (`joke`)
+* We should also make a piece of state to store an error if one is returned (`error`)
+* We can use conditional rendering to render an error message if there was one.
+
+## Challenge 1: Make a Dog API app
+
+1. Create the app
+```
+npm create vite@latest
+# Name it dog-fetcher
+# Select React
+# Select JavaScript
+cd dog-fetcher
+npm i
+npm run dev
+```
+
+2. Then, copy the the `src/utils` folder from the `1-joke-fetch-on-click` folder into your own `src/` folder. Don't forget to `import` it into your `App.jsx` file!
+3. Replace the `App` contents with your own app that has a `<button>` and an `<img>`. 
+4. The `App` should have a `dogPicture` and an `error` state
+5. When the user clicks on the button, it should send a fetch to https://dog.ceo/api/breeds/image/random and update either the `dogPicture` or `error` state depending on the returned value
+6. The `img` should render the `dog` state or the `error` message.
+
+**<details><summary style="color: purple">Potential Solution</summary>**
+
+```jsx
+import { useState } from 'react'
+import fetchData from './utils/fetchData'
+import './App.css'
+
+const DOG_API = "https://dog.ceo/api/breeds/image/random";
+
+function App() {
+  // Create state for the fetched data
+  const [dog, setDog] = useState();
+  // Always create state to store any errors
+  const [error, setError] = useState('');
+
+  // Make the event handler async
+  const handleClick = async () => {
+    const [data, error] = await fetchData(DOG_API);
+    if (data) setDog(data.message);
+    if (error) setError(error);
+  }
+
+  // Conditional Rendering
+  if (error) return <p>{error.message}</p>
+
+  return (
+    <>
+      <button onClick={handleClick}>Get Random Dog Picture</button>
+      <img src={dog} alt="" />
+    </>
+  );
+}
+
+export default App
+```
+
+</details><br>
 
 ## useEffect
 
-`useEffect` allows our React components to execute code that produces "side effects" when the component renders. 
+There are two ways to perform a side effect like fetching:
+1. In response to user events
+2. In response to the component rendering ("reacting to the component rendering")
 
-We can think of a side effect in react as **anything that happens outside of React** such as:
-* sending a `fetch` request
-* starting an animation
-* setting up a server connections
-* modifying the DOM directly
-* etc...
+In our current joke API app, we only send a fetch in response to the user clicking on the button. But what if we want to show a joke when the page first renders?
 
-In the example below, we have a piece of state called `count` and we are using that value to dynamically update the `document.title`. 
+We can accomplish this with the hook `useEffect` — a react hook for executing "side effects" caused by a component rendering, not a particular event.
 
-React is not in the business of direct DOM manipulation, so we create an _effect_ using `useEffect`.
+> **Q: How do we know that this is a hook?**
+
+### useEffect Syntax
+
+`useEffect` takes in two arguments:
+1. A callback function
+2. [optional] A "dependency array" 
+
+It should be invoked at the top of the component, next to the other hooks used by the component (often below `useState`)
 
 ```jsx
-import { useState, useEffect } from "react";
+function App() {
+  const [joke, setJoke] = useState(defualtJoke);
+  const [error, setError] = useState();
 
-function Counter() {
-  const [count, setCount] = useState(0);
-
+  // invoke useEffect at the top of the component, next to
+  // the other hooks
   useEffect(() => {
-    document.title = count;
-  }, [count]); 
+    const doFetch = async () => {
+      const [data, error] = await fetchData(JOKE_API_URL);
+      if (data) setJoke(data);
+      if (error) setError(error);
+    };
+    doFetch();
+  }, []);
 
-  const handleClick = () => {
-    setCount((count) => count + 1);
-    // document.title = count; // <-- bad
-  }
-
-  return (
-    <>
-      <button onClick={handleClick}>+</button>
-      <p>{count}</p>
-    </>
-  );
+// handleClick
+// return JSX to render the joke
 }
 ```
 
-The flow of control looks like this:
-1. The `Counter` component is rendered with a starting state of `count = 0`
-2. The effect is executed after the component renders, updating the document's `title`.
-3. A user clicks on the button, invoking `setCount()`, triggering a re-render of `Counter` with a state of `count = 1`
-4. `useEffect` checks the dependency array for any changes since the last render. `count` has been updated so it runs again, updating the document's `title`.
+Notice that this callback creates a `async doFetch` function that fetches, and sets the `joke` or the `error` state depending on what is returned.
 
-![](./notes-img/useEffect-render-cycle.svg)
 
-## useEffect Syntax
 
-Let's look at the steps involved to dynamically update the `document.title` using `useEffect`
+### The Effect callback
 
-### 1. Import the useEffect hook
+Why do we need to define `doFetch` and then invoke it? Why not just make the callback itself async.
+
+Unfortunately, we can't make the callback async — we get an error
 
 ```jsx
-import { useEffect } from "react"; // when importing alone
-import { useState, useEffect } from "react"; // when importing alongside other named exports
-```
-
-- `useEffect` is a _named export_ of the `react` package, just like `useState`.
-
-### 2. Invoke `useEffect` at the TOP of your component with your other hooks.
-
-```jsx
-import { useState, useEffect } from "react";
-
-const Counter = () => {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    document.title = count;
-  }, [count]); // re-run the effect whenever count changes
-
-  // return the component
-};
-```
-
-- `useEffect(effect, dependencies)` takes in two arguments
-  1. an `effect` callback function to execute when the component is first rendered
-  2. (optional) a `dependencies` array of state values to track.
-- If the dependency array is provided, the effect will be only re-run on future renders if any of those dependency values are updated.
-
-### 3. Determine your dependency array
-
-```jsx
-useEffect(() => {
-    document.title = count;
-  }, [count]); // re-run the effect whenever count changes
-
-useEffect(() => {
-  document.title = count;
-}, []); // only execute the effect once
-
-useEffect(() => {
-  document.title = count;
-}); // execute after EVERY re-render
-```
-
-- If the dependency array is provided, the effect will be only re-run on future renders if any of those dependency values are updated.
-- If the array is empty, the effect is only executed on the first render of the component.
-- If the array is omitted, the effect is executed on EVERY render of the component.
-
-##
-
-Now, let's fetch the joke using the API and `useEffect`. Unfortunately, we can't make the callback async:
-
-```jsx
-// this doesn't work
+// Throws an error
 useEffect(async () => {
-  const response = await fetch()
-  // ....
+  const [data, error] = await fetchData(JOKE_API_URL);
+  if (data) setJoke(data);
+  if (error) setError(error);
 }, []);
 ```
 
@@ -236,64 +199,94 @@ So, inside of the callback, we make an `async` function that does the fetch and 
 ```jsx
 function App() {
   const [joke, setJoke] = useState(defualtJoke);
+  const [error, setError] = useState();
 
   useEffect(() => {
     const doFetch = async () => {
-      const url = "https://v2.jokeapi.dev/joke/Any";
-      const [data, error] = await fetchData(url);
-      if (data) setJoke(data);
-    };
-    doFetch();
-  }, []);
-
-  // return JSX to render the joke
-}
-```
-
-> For a refresher on how to fetch, look at the `src/utils/fetchData.js` helper function. It returns a `[data, error]` tuple.
-
-**<details><summary style="color: purple">Q: When / how many times will this effect run?</summary>**
-> Only one time, on the first render, because the dependency array is empty.
-</details><br>
-
-### Handling Errors
-
-If an error occurs, it is important to let the user know in some way. There are many ways of doing this but here is a very simple one:
-
-```jsx
-function App() {
-  const [joke, setJoke] = useState(defualtJoke);
-  const [errorMessage, setErrorMessage] = useState('');
-
-  useEffect(() => {
-    const doFetch = async () => {
-      const url = "https://v2.jokeapi.dev/joke/Any";
-      const [data, error] = await fetchData(url);
+      const [data, error] = await fetchData(JOKE_API_URL);
       if (data) setJoke(data);
       if (error) setError(error);
     };
     doFetch();
   }, []);
 
-  // conditional rendering for the win!
-  if (errorMessage) return <p>{errorMessage}</p>
-
-  return (
-    <>
-      <div className="joke">
-        <h1>{joke.setup}</h1>
-        <p>{joke.delivery}</p>
-      </div>
-    </>
-  );
+// handleClick
+// return JSX to render the joke
 }
 ```
 
-Here, we render different JSX depending on if the `errorMessage` was set.
+### The Dependency Array
 
-### We can still fetch in response to events:
+`useEffect(effect, dependencyArray)` needs to accept an `effect` callback but the second argument `dependencyArray` is optional. There are three ways that we can provide this value:
 
+```jsx
+useEffect(effect); // execute after EVERY re-render
+useEffect(effect, []); // only execute the effect once
+useEffect(effect, [valueA, valueB]); // re-run the effect whenever the array changes between renders
+```
 
+- If the array is omitted, the effect is executed on EVERY render of the component.
+- If the array is empty, the effect is only executed on the first render of the component.
+- If the dependency array is provided, the effect will be only re-run on future renders if the values in the array change between renders.
+
+## Challenge 2: Fetch On Render
+
+Add to your dog API app by having it render a dog image on the first render (and only on that first render!)
+
+**<details><summary style="color: purple">Potential Solution</summary>**
+
+```jsx
+import { useState, useEffect } from 'react'
+import fetchData from './utils/fetchData'
+import './App.css'
+
+const DOG_API = "https://dog.ceo/api/breeds/image/random";
+
+function App() {
+  // Create state for the fetched data
+  const [dog, setDog] = useState();
+  // Always create state to store any errors
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const doFetch = async () => {
+      const [data, error] = await fetchData(DOG_API);
+      if (data) setDog(data.message);
+      if (error) setError(error);
+    }
+    doFetch();
+  }, []);
+
+  // Make the event handler async
+  const handleClick = async () => {
+    const [data, error] = await fetchData(DOG_API);
+    if (data) setDog(data.message);
+    if (error) setError(error);
+  }
+
+  // Conditional Rendering
+  if (error) return <p>{error.message}</p>
+
+  return (
+    <>
+      <button onClick={handleClick}>Get Random Dog Picture</button>
+      <img src={dog} alt="" />
+    </>
+  );
+}
+
+export default App
+```
+
+</details><br>
+
+## Fetching With a Form On Change
+
+Now, let's fetch the joke using the API and `useEffect`. 
+
+**<details><summary style="color: purple">Q: When / how many times will this effect run?</summary>**
+> Only one time, on the first render, because the dependency array is empty.
+</details><br>
 
 ### Using a Form input to re-run the effect
 
