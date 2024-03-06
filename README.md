@@ -80,7 +80,7 @@ This example demonstrates a few important concepts:
 
 Let's create an app that fetches from the dog API and shows a random dog picture whenever the user clicks on a button.
 
-![](./notes-img/dog-fetcher.png)
+<img src="./notes-img/dog-fetcher.png" style="max-width: 600px;"/>
 
 The dog API https://dog.ceo/api/breeds/image/random returns an object like this:
 
