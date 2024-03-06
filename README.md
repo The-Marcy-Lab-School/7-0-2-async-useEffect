@@ -99,9 +99,12 @@ npm create vite@latest
 # Name it dog-fetcher
 # Select React
 # Select JavaScript
+
 cd dog-fetcher
 npm i
 npm run dev
+
+# Delete the contents of App.jsx
 ```
 
 2. Then, copy the the `src/utils` folder from the `1-joke-fetch-on-click` folder into your own `src/` folder. Don't forget to `import` it into your `App.jsx` file!
@@ -110,7 +113,7 @@ npm run dev
 import fetchData from './utils/fetchData';
 ```
 
-3. The `App` should have a `dogPicture` and an `error` state. You can use this as your starting `dogPicture` state:
+3. The `App` should have a `dogPicture` and an `error` state. Visit the API https://dog.ceo/api/breeds/image/random to get an example object that you can use as the starting state for `dogPicture`. Something like this:
 
 ```js
 {
