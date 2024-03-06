@@ -107,11 +107,9 @@ npm run dev
 # Delete the contents of App.jsx
 ```
 
-2. Then, copy the the `src/utils` folder from the `1-joke-fetch-on-click` folder into your own `src/` folder. Don't forget to `import` it into your `App.jsx` file!
+1. Then, copy the the `src/utils` folder from the `1-joke-fetch-on-click` folder into your own `src/` folder.
 
-```js
-import fetchData from './utils/fetchData';
-```
+2. Use the code in the `1-joke-fetch-on-click/src` folder to guide you to creating this app
 
 3. The `App` should have a `dogPicture` and an `error` state. Visit the API https://dog.ceo/api/breeds/image/random to get an example object that you can use as the starting state for `dogPicture`. Something like this:
 
@@ -125,14 +123,6 @@ import fetchData from './utils/fetchData';
 4. Replace the `App` contents with your own app that has a `<button>` and an `<img>`. The `img` should render the `dogPicture.message`.
 
 5. When the user clicks on the button, it should send a fetch to the dogAPI and update either the `dogPicture` or `error` state depending on the returned tuple
-
-```js
-const handleClick = async () => {
-  const [data, error] = await fetchData(DOG_API);
-  if (data) setDogPicture(data);
-  if (error) setError(error);
-}
-```
 
 6. Add a conditional render to show the `error.message` if there is an error.
 
