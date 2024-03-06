@@ -21,6 +21,7 @@ We've already learned about one hook, `useState`. Time for another one! In this 
   - A side effect is anything that happens outside of React such sending a `fetch` request, starting an animation, or setting up a server connections.
   - You can still perform side effects in response to events without `useEffect`
 - **Dependency Array** — The array of values provided to `useEffect` that React will watch for changes. If changes occur in the dependency array, the effect will run again.
+- **Conditional Rendering** — Rendering different JSX depending on the current state. This can be useful when fetching to show either the fetched data or an error message if the fetch failed.
 
 ## useEffect
 
