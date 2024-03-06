@@ -324,7 +324,7 @@ function App() {
 
   return (
     <>
-      <form onSubmit={handleSubmit}>
+      <form>
         <input
           type="text"
           placeholder="query"
