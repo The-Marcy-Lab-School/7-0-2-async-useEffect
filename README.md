@@ -196,7 +196,7 @@ It should be invoked at the top of the component, next to the other hooks used b
 
 ```jsx
 function App() {
-  const [joke, setJoke] = useState(defualtJoke);
+  const [joke, setJoke] = useState(defaultJoke);
   const [error, setError] = useState();
 
   // invoke useEffect at the top of the component, next to
@@ -238,7 +238,7 @@ So, inside of the callback, we make an `async` function that does the fetch and 
 
 ```jsx
 function App() {
-  const [joke, setJoke] = useState(defualtJoke);
+  const [joke, setJoke] = useState(defaultJoke);
   const [error, setError] = useState();
 
   useEffect(() => {
@@ -332,7 +332,7 @@ function App() {
 
   useEffect(() => {
     const doFetch = async () => {
-      const [data, error] = await fetchData(JOKE_API_URL);
+      const [data, error] = await fetchData(`${JOKE_API_URL}&contains=${query}`);
       if (data) setJoke(data);
       if (error) setError(error);
     };

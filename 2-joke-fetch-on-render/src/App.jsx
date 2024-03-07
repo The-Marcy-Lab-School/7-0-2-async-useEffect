@@ -17,7 +17,7 @@ const defaultJoke = {
 };
 
 function App() {
-  const [joke, setJoke] = useState(defaultJoke);
+  const [joke, setJoke] = useState();
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -25,15 +25,18 @@ function App() {
       const [data, error] = await fetchData(JOKE_API_URL);
       if (data) setJoke(data);
       if (error) setError(error);
-    };
+    }
     doFetch();
-  }, [])
+  }, []) // <-- run the effect once
+  // When does useEffect execute the effect?
+  // When the component it is in is rendered
 
   const handleClick = async () => {
     const [data, error] = await fetchData(JOKE_API_URL);
     if (data) setJoke(data);
     if (error) setError(error);
   }
+  // this side effect runs when the button is clicked
 
   if (error) return <p>{error.message}</p>
 
@@ -42,8 +45,8 @@ function App() {
       <button onClick={handleClick}>Get Random Joke</button>
 
       <div className="joke">
-        <h1>{joke.setup}</h1>
-        <p>{joke.delivery}</p>
+        <h1>{joke?.setup}</h1>
+        <p>{joke?.delivery}</p>
       </div>
     </>
   );
